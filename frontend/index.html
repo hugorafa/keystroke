@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Keystroke Auth</title>
+</head>
+<body>
+
+<h2>Digite a frase: seguranca digital e essencial</h2>
+<input type="text" id="input" />
+
+<button onclick="train()">Treinar</button>
+<button onclick="verify()">Verificar</button>
+
+<script>
+
+let keystrokes = [];
+let input = document.getElementById("input");
+
+input.addEventListener("keydown", function(e){
+  keystrokes.push({
+    key: e.key,
+    down: Date.now()
+  });
+});
+
+input.addEventListener("keyup", function(e){
+  keystrokes[keystrokes.length-1].up = Date.now();
+});
+
+async function train(){
+  let res = await fetch("/train", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({keystrokes})
+  });
+  let data = await res.json();
+  alert(data.status || "Treinamento enviado");
+  keystrokes = [];
+  input.value = "";
+}
+
+async function verify(){
+  let res = await fetch("/verify", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({keystrokes})
+  });
+  let data = await res.json();
+  alert(data.result);
+  keystrokes = [];
+  input.value = "";
+}
+
+</script>
+</body>
+</html>
